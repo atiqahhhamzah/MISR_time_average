@@ -21,6 +21,7 @@ import pandas as pd
 import numpy as np
 from pyhdf.SD import *
 import geo_grid
+import misr_tools
 
 class GridBlock:
 
@@ -52,14 +53,14 @@ class GridBlock:
         self.grid['Red'] = np.nan
         self.grid['Green'] = np.nan
         self.grid['Blue'] = np.nan
-        self.grid['Year'] = np.nan
-        self.grid['Month'] = np.nan
-        self.grid['Day'] = np.nan
+        self.grid['SolarZenith'] = np.nan
+        # self.grid['Year'] = np.nan
+        # # self.grid['Month'] = np.nan
+        # # self.grid['Day'] = np.nan
         if self.filetype == 'MISR':
             self.grid['Path'] = np.nan
-            self.grid['Orbit'] = np.nan
+           # self.grid['Orbit'] = np.nan
         if self.filetype == 'MODIS':
-            self.grid['SolarZenith'] = np.nan
             self.grid['reflectance_offsets'] = np.nan
             self.grid['radiance_offsets'] = np.nan
             self.grid['reflectance_scales'] = np.nan
@@ -145,13 +146,15 @@ class GridBlock:
             print "Geolocation information already in database"
             return
         lat_lon_arr = geo_grid.build_agp_dataset(agp_file,self.grid_size)
-
+        print "Inserting geolocation values into database"
         ij = np.arange(len(lat_lon_arr))
         df = pd.DataFrame({ 'Path':     pd.Series(path,index=list(range(len(ij))),dtype='int32'),
                             'Latitude': lat_lon_arr[:,1],
                             'Longitude':lat_lon_arr[:,0],
                             'ij':ij})
         self.geolocation = self.geolocation.append(df)
+        print "Geolocation insertion complete"
+
         
 
     def describe(self):
@@ -166,6 +169,36 @@ class GridBlock:
         print 'Grid Columns: ' + str(list(self.grid.columns.values))
         print 'Current grid count: ' + str(self.grid.shape[0]) + '\n'
     
+
+    def insert_misr_file(self, filename, solar_zenith = np.nan, path = np.nan, orbit = np.nan, year = np.nan, month = np.nan, 
+        day = np.nan):
+        path = int(filename[filename.find('_P') + 2: filename.find('_P') + 5])
+        dataset = self.geolocation.loc[self.geolocation['Path'] == path]
+        lat_lon = np.squeeze(dataset.as_matrix(['Latitude','Longitude']))
+        lat = lat_lon[:,0]
+        lon = lat_lon[:,1]
+        print "Extracting MISR data"
+        misr_data = misr_tools.extract_hdf_radiance(filename)
+        red = misr_data[0].ravel()
+        green = misr_data[1].ravel()
+        blue = misr_data[2].ravel()
+        solar_zenith = misr_data[3].ravel()
+        position = np.array([1]*len(red))
+        print "Inserting MISR data"
+        dataset = pd.DataFrame({ 'X': lon,
+                                'Y': lat,
+                            'ij':position,
+                            'Red': red,
+                            'Green': green,
+                            'Blue' : blue,
+                            'SolarZenith':solar_zenith,
+                            'Path':pd.Series(path,index=list(range(len(red))),dtype='int32')})
+        print "MISR data insertion complete. Getting rid of Nan values"
+        dataset = dataset.dropna(subset=['Red','Green','Blue','SolarZenith'])
+        self.grid = self.grid.append(dataset)
+        print "MISR data appended to dataset"
+        #self.grid.dropna(subset=['red'])
+
 
     def insert(self,latitude,longitude, position, red = np.nan, green = np.nan, blue = np.nan, 
         solar_zenith = np.nan, path = np.nan, orbit = np.nan, year = np.nan, month = np.nan, 
@@ -248,7 +281,7 @@ class GridBlock:
         Averages and groups data similar in X, Y columns
         into a single index in the dataframe
         """
-        self.grid = self.grid.groupby(['X', 'Y'], as_index=False).mean()
+        self.grid = self.grid.groupby(['X', 'Y'], as_index=False)['Red','Green','Blue'].mean()
 
 
     def sort(self):
