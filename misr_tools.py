@@ -54,5 +54,5 @@ def extract_hdf_radiance(misr_file, shrink_shape=False):
 			green_s[i] = np.array(shrink(green[i],128,512))
 			blue_s[i] = np.array(shrink(blue[i],128,512))
 
-
+	if(shrink_shape == True): return np.array(([red_s,green_s,blue_s,solarZenith_e]))
 	return np.array([red,green,blue,solarZenith_e])

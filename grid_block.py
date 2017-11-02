@@ -281,7 +281,8 @@ class GridBlock:
         Averages and groups data similar in X, Y columns
         into a single index in the dataframe
         """
-        self.grid = self.grid.groupby(['X', 'Y'], as_index=False)['Red','Green','Blue'].mean()
+        # df.groupby("dummy").agg({"returns": [np.mean, np.sum]})
+        self.grid = self.grid.groupby(['X', 'Y']).agg({'Red':np.mean, 'Green': np.mean,'Blue' : np.mean, 'ij': np.sum, 'Path': np.mean}).reset_index()
 
 
     def sort(self):
