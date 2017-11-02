@@ -63,6 +63,5 @@ def build_agp_dataset(agp_file,exp):
 	
 	return lat_lon
 
-
-
-
+file = sys.argv[1]
+test = get_latitude_longitude(file)
