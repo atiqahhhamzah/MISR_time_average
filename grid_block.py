@@ -106,6 +106,7 @@ class GridBlock:
 
     def save_geolocation_hdf5(self,filename):
         self.geolocation.to_hdf(filename.strip() + '.h5','key_to_store', table=True, mode='a')
+        print 'Saved to ' + filename.strip() + '.h5'
 
     def save_geolocation_db(self,filename):
         """
