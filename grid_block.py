@@ -26,7 +26,7 @@ import misr_tools
 class GridBlock:
 
 
-    def __init__(self,grid_size,filetype='MISR'):
+    def __init__(self,grid_size,filetype='MISR',shrink=False):
         """
         Initializes and computes the class attributes described
         Input       --  grid_size : Desired length of grid
@@ -41,6 +41,7 @@ class GridBlock:
                     --  geolocation : pandas dataframa that holds geolocation 
                         data (specific to MISR)
         """
+        self.shrink = shrink
         self.grid_size = grid_size
         self.width = int(360/grid_size)
         self.height = int(180/grid_size)
@@ -79,6 +80,10 @@ class GridBlock:
             self.geolocation['ij'] = np.nan
 
 
+    def save_grid_hdf5(self,filename):
+        self.grid.to_hdf(filename.strip() + '.h5','MISR_grid_db', table=True, mode='a')
+        print 'Saved to ' + filename.strip() + '.h5'
+
     def save_grid(self,filename):
         """
         Saves the grid dataframe into a pickle
@@ -99,6 +104,8 @@ class GridBlock:
         """
         self.grid = pd.read_pickle(filename)
 
+    def save_geolocation_hdf5(self,filename):
+        self.geolocation.to_hdf(filename.strip() + '.h5','key_to_store', table=True, mode='a')
 
     def save_geolocation_db(self,filename):
         """
@@ -178,12 +185,13 @@ class GridBlock:
         lat = lat_lon[:,0]
         lon = lat_lon[:,1]
         print "Extracting MISR data"
-        misr_data = misr_tools.extract_hdf_radiance(filename)
+        misr_data = misr_tools.extract_hdf_radiance(filename,shrink_shape = self.shrink)
         red = misr_data[0].ravel()
         green = misr_data[1].ravel()
         blue = misr_data[2].ravel()
         solar_zenith = misr_data[3].ravel()
         position = np.array([1]*len(red))
+        path_pd = pd.Series(path,index=list(range(len(red))),dtype='int32')
         print "Inserting MISR data"
         dataset = pd.DataFrame({ 'X': lon,
                                 'Y': lat,
@@ -192,7 +200,7 @@ class GridBlock:
                             'Green': green,
                             'Blue' : blue,
                             'SolarZenith':solar_zenith,
-                            'Path':pd.Series(path,index=list(range(len(red))),dtype='int32')})
+                            'Path':path_pd})
         print "MISR data insertion complete. Getting rid of Nan values"
         dataset = dataset.dropna(subset=['Red','Green','Blue','SolarZenith'])
         self.grid = self.grid.append(dataset)
