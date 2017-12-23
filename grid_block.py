@@ -26,7 +26,7 @@ import misr_tools
 class GridBlock:
 
 
-    def __init__(self,grid_size,filetype='MISR',shrink=False):
+    def __init__(self, grid_size, filetype='MISR', shrink=False):
         """
         Initializes and computes the class attributes described
         Input       --  grid_size : Desired length of grid
@@ -80,11 +80,11 @@ class GridBlock:
             self.geolocation['ij'] = np.nan
 
 
-    def save_grid_hdf5(self,filename):
+    def save_grid_hdf5(self, filename):
         self.grid.to_hdf(filename.strip() + '.h5','MISR_grid_db', table=True, mode='a')
         print 'Saved to ' + filename.strip() + '.h5'
 
-    def save_grid(self,filename):
+    def save_grid(self, filename):
         """
         Saves the grid dataframe into a pickle
         file which retains the dataframe structure
@@ -96,7 +96,7 @@ class GridBlock:
         print 'Saved to ' + filename.strip() + '.pkl'
     
 
-    def load_grid(self,filename):
+    def load_grid(self, filename):
         """
         Loads the existing grid dataframe
         from another pkl file
@@ -104,7 +104,7 @@ class GridBlock:
         """
         self.grid = pd.read_pickle(filename)
 
-    def save_geolocation_hdf5(self,filename):
+    def save_geolocation_hdf5(self, filename):
         self.geolocation.to_hdf(filename.strip() + '.h5','key_to_store', table=True, mode='a')
         print 'Saved to ' + filename.strip() + '.h5'
 
@@ -178,11 +178,11 @@ class GridBlock:
         print 'Current grid count: ' + str(self.grid.shape[0]) + '\n'
     
 
-    def insert_misr_file(self, filename, solar_zenith = np.nan, path = np.nan, orbit = np.nan, year = np.nan, month = np.nan, 
-        day = np.nan):
+    def insert_misr_file    (self, filename, solar_zenith = np.nan, path = np.nan, orbit = np.nan, 
+                             year = np.nan, month = np.nan, day = np.nan):
         path = int(filename[filename.find('_P') + 2: filename.find('_P') + 5])
         dataset = self.geolocation.loc[self.geolocation['Path'] == path]
-        lat_lon = np.squeeze(dataset.as_matrix(['Latitude','Longitude']))
+        lat_lon = np.squeeze(dataset.as_matrix(['Latitude', 'Longitude']))
         lat = lat_lon[:,0]
         lon = lat_lon[:,1]
         print "Extracting MISR data"
@@ -232,7 +232,6 @@ class GridBlock:
                     --  radiance_scales : MODIS brf conversion requirement
 
         """
-        #grid_array = np.int_(np.ceil(latitude/np.float(self.grid_size)))*np.int_(self.grid_width) + np.int_(np.ceil(longitude/np.float_(self.grid_size)))
         if self.filetype == 'MISR':
             dataset = self.geolocation.loc[self.geolocation['Path'] == path]
             lat_lon = np.squeeze(dataset.as_matrix(['Latitude','Longitude']))

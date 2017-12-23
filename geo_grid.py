@@ -16,10 +16,6 @@ def get_latitude_longitude(filename):
 	4-d numpy array
 	"""
 
-	# agp_file  = pathname + "MISR_AM1_AGP_" + (filename.replace('MISR_AM1_GRP_ELLIPSOID_GM_',''))[:4] + "_F01_24.hdf"
-
-	# hdf = SD(agp_file)
-
 	hdf = SD(filename)
 
 	lat = hdf.select('GeoLatitude')[:,:,:]
@@ -38,13 +34,13 @@ def get_modis_latitude_longitude(modis_filename):
 	return (lat,lon)
 
 def build_agp_dataset(agp_file,exp):
-	"""
-	Takes in MISR agp hdf file 
-	and grid decimal point number 
-	and returns a 2 x 180 x 128 x 512 
-	numpy array that is [longitude, latitude] 
-	x block x width x height
-	"""
+"""
+Takes in MISR agp hdf file 
+and grid decimal point number 
+and returns a 2 x 180 x 128 x 512 
+numpy array that is [longitude, latitude] 
+x block x width x height
+"""
 
 	#if filetype == 'MISR':
 	
@@ -63,5 +59,3 @@ def build_agp_dataset(agp_file,exp):
 	
 	return lat_lon
 
-file = sys.argv[1]
-test = get_latitude_longitude(file)
