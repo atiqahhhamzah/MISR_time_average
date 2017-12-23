@@ -2,18 +2,6 @@
 @author : Nurul Atiqah Hamzah
 @email : hamzah3@illinois.edu
 
-Fixes Needed as of week of 8/4/2017:
-Adapt to Terra Data Fusion blocks and for 
-both MISR and MODIS. Currently works fine
-with misr but not MODIS due to resolution
-differences between MODIS's geolocation 
-attributes and radiance data
-
-Other issues:
-Still trying to figure out how to do a 
-map projection on basemap with dataframe
-radiance data
-
 """
 
 from math import ceil,floor,sqrt
@@ -206,8 +194,7 @@ class GridBlock:
         dataset = dataset.dropna(subset=['Red','Green','Blue','SolarZenith'])
         self.grid = self.grid.append(dataset)
         print "MISR data appended to dataset"
-        #self.grid.dropna(subset=['red'])
-
+   
 
     def insert(self,latitude,longitude, position, red = np.nan, green = np.nan, blue = np.nan, 
         solar_zenith = np.nan, path = np.nan, orbit = np.nan, year = np.nan, month = np.nan, 
@@ -289,7 +276,6 @@ class GridBlock:
         Averages and groups data similar in X, Y columns
         into a single index in the dataframe
         """
-        # df.groupby("dummy").agg({"returns": [np.mean, np.sum]})
         self.grid = self.grid.groupby(['X', 'Y']).agg({'Red':np.mean, 'Green': np.mean,'Blue' : np.mean, 'ij': np.sum, 'Path': np.mean}).reset_index()
 
 

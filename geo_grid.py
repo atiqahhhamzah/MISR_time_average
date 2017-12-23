@@ -55,6 +55,7 @@ x block x width x height
 	# Build a pixel to latitude,longitude map  
 	lat_lon = np.squeeze(np.dstack((lon,lat)))
 
+	# Regrid the lat_lon data into the the grid degree 
 	lat_lon = np.floor(np.float64(lat_lon/exp))*exp
 	
 	return lat_lon
