@@ -6,6 +6,7 @@ from pyhdf.SD import *
 
 pathname = "/gpfs/largeblockFS/projects/TDataFus/gyzhao/TF/data/MISR/AGP/"
 agp_file = "MISR_AM1_AGP_"
+hello = "AHHHHH"
 
 
 def get_latitude_longitude(filename):
